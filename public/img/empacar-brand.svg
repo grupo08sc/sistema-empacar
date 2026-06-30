@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 140" role="img" aria-label="EMPACAR S.A.">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#006B3F"/>
+      <stop offset="55%" stop-color="#00A859"/>
+      <stop offset="100%" stop-color="#006BA6"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="12" width="504" height="116" rx="28" fill="#fff"/>
+  <path d="M84 28c25 0 45 20 45 45 0 25-20 45-45 45S39 98 39 73c0-25 20-45 45-45Zm0 17c-15 0-28 13-28 28 0 16 13 28 28 28s28-12 28-28c0-15-13-28-28-28Z" fill="#006B3F"/>
+  <path d="M84 21 103 44H88c-21 0-38 17-38 38 0 4 1 8 2 12L36 76c-1-28 20-52 48-55Zm0 98-19-23h15c21 0 38-17 38-38 0-4-1-8-2-12l16 18c1 28-20 52-48 55Z" fill="url(#g)"/>
+  <text x="158" y="76" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="800" fill="#006B3F" letter-spacing="1">EMPACAR</text>
+  <text x="160" y="105" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#006BA6" letter-spacing="3">S.A.</text>
+  <path d="M360 92h110" stroke="#8DC63F" stroke-width="8" stroke-linecap="round"/>
+</svg>
