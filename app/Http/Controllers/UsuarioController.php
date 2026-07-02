@@ -17,7 +17,7 @@ class UsuarioController extends Controller
         $contar = new Contador();
         $num = $contar->contarModel(11);
 
-        $roles = Role::where('state', 'a')->where('nombre', '!=', 'Cliente')->orderBy('nombre')->get();
+        $roles = Role::where('state', 'a')->orderBy('nombre')->get();
 
         $usuarios = Usuario::with(['rol'])
             ->where('state', 'a')

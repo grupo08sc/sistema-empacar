@@ -41,7 +41,9 @@ class RegistrarAccesoPagina
             return false;
         }
 
-        if ($request->expectsJson() || $request->ajax()) {
+        $esInertia = $request->headers->has('X-Inertia');
+
+        if (($request->expectsJson() || $request->ajax()) && ! $esInertia) {
             return false;
         }
 

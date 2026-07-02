@@ -88,7 +88,7 @@ const empacarLogo = '/img/empacar-brand.svg';
 
                             <div class="demo-access text-center">
                                 <small>
-                                    Usuario inicial: <strong>admin@empacar.local</strong> / <strong>secret</strong>
+                                    Bienvenido al Sistema Web de Gestión Comercial de EMPACAR S.A.
                                 </small>
                             </div>
                         </form>

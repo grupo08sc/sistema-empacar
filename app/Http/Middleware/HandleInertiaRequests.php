@@ -38,6 +38,10 @@ class HandleInertiaRequests extends Middleware
                 ->toArray();
         }
 
+        $contadorModuloActual = $request->attributes->get('contador_modulo_actual') ?? $this->resolverModuloContador($request) ?? 'Landing';
+        $contadorPaginaActual = $request->attributes->get('contador_pagina_actual') ?? \App\Models\Contador::where('nombre', $contadorModuloActual)->value('visitas') ?? 0;
+        $visitasTotales = \App\Models\Contador::sum('visitas');
+
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $user,
@@ -46,9 +50,9 @@ class HandleInertiaRequests extends Middleware
             'menu' => $this->menuDinamico($privilegios, $user),
             'homeRoute' => $this->rutaInicio($privilegios, $user),
             'empresa' => fn () => Empresa::query()->select('id', 'nombre', 'logo_path')->first(),
-            'num' => $request->session()->get('contador_pagina', 0),
-            'contadorModulo' => $request->session()->get('contador_modulo', ''),
-            'visitas' => $request->session()->get('contador_pagina', 0),
+            'num' => $contadorPaginaActual,
+            'contadorModulo' => $contadorModuloActual,
+            'visitas' => $visitasTotales,
             'assetUrl' => asset('/'),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
@@ -56,6 +60,102 @@ class HandleInertiaRequests extends Middleware
             ],
         ]);
     }
+
+
+
+    private function resolverModuloContador(Request $request): ?string
+
+    {
+
+        $name = $request->route()?->getName();
+
+
+
+        if (! $name) {
+
+            return null;
+
+        }
+
+
+
+        $mapaExacto = [
+
+            'landing' => 'Landing',
+
+            'dashboard' => 'Dashboard',
+
+            'dashboardvue' => 'Dashboard',
+
+            'login' => 'Login',
+
+            'intruso' => 'Acceso no autorizado',
+
+            'profile.edit' => 'Perfil',
+
+        ];
+
+
+
+        if (isset($mapaExacto[$name])) {
+
+            return $mapaExacto[$name];
+
+        }
+
+
+
+        $prefijo = \Illuminate\Support\Str::before($name, '.');
+
+
+
+        return match ($prefijo) {
+
+            'empresa' => 'Empresa',
+
+            'cliente' => 'Cliente',
+
+            'pago', 'pagos' => 'Pago',
+
+            'metodos-pago' => 'MetodoPago',
+
+            'privilegio', 'privilegios' => 'Privilegio',
+
+            'producto' => 'Producto',
+
+            'categoria' => 'Categoria',
+
+            'rol' => 'Rol',
+
+            'usuario' => 'Usuario',
+
+            'venta', 'ventas' => 'Venta',
+
+            'planes' => 'PlanPago',
+
+            'reportes', 'estadisticas' => 'Reportes',
+
+            'auditoria' => 'Auditoria',
+
+            'inventario' => 'Inventario',
+
+            'proveedores' => 'Proveedor',
+
+            'compras' => 'Compra',
+
+            'solicitudes' => 'Solicitud',
+
+            'pagos-proveedor' => 'PagoProveedor',
+
+            'cargarEstilo' => 'Preferencias visuales',
+
+            default => \Illuminate\Support\Str::title(str_replace(['-', '_'], ' ', $prefijo)),
+
+        };
+
+    }
+
+
 
     private function rutaInicio(array $privilegios, $user): string
     {
