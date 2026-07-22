@@ -9,27 +9,28 @@ class Compra extends Model
     protected $table = 'compras';
 
     protected $fillable = [
-        'id_proveedor',
-        'id_usuario',
-        'solicitado_por',
         'aprobado_por',
+        'descuento',
+        'estado_aprobacion',
+        'estado',
+        'fecha_aprobacion',
         'fecha_compra',
         'fecha_solicitud',
-        'fecha_aprobacion',
-        'subtotal',
-        'descuento',
-        'total',
-        'monto_pagado',
-        'saldo',
-        'estado',
-        'estado_aprobacion',
-        'observaciones',
+        'id_proveedor',
+        'id_usuario',
         'metodo_pago_propuesto',
-        'referencia_pago_propuesto',
+        'monto_pagado',
         'motivo_rechazo',
         'observacion_aprobacion',
-        'stock_aplicado',
+        'observaciones',
+        'referencia_pago_propuesto',
+        'saldo',
+        'solicitado_por',
+        'solicitud_id',
         'state',
+        'stock_aplicado',
+        'subtotal',
+        'total',
     ];
 
     protected $casts = [
@@ -82,5 +83,10 @@ class Compra extends Model
     public function estaAprobada(): bool
     {
         return $this->estado_aprobacion === 'aprobada';
+    }
+
+    public function solicitud()
+    {
+        return $this->belongsTo(Solicitud::class, 'solicitud_id');
     }
 }

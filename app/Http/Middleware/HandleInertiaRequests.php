@@ -49,14 +49,14 @@ class HandleInertiaRequests extends Middleware
             ],
             'menu' => $this->menuDinamico($privilegios, $user),
             'homeRoute' => $this->rutaInicio($privilegios, $user),
-            'empresa' => fn () => Empresa::query()->select('id', 'nombre', 'logo_path')->first(),
+            'empresa' => fn() => Empresa::query()->select('id', 'nombre', 'logo_path')->first(),
             'num' => $contadorPaginaActual,
             'contadorModulo' => $contadorModuloActual,
             'visitas' => $visitasTotales,
             'assetUrl' => asset('/'),
             'flash' => [
-                'success' => fn () => $request->session()->get('success'),
-                'error' => fn () => $request->session()->get('error'),
+                'success' => fn() => $request->session()->get('success'),
+                'error' => fn() => $request->session()->get('error'),
             ],
         ]);
     }
@@ -74,7 +74,6 @@ class HandleInertiaRequests extends Middleware
         if (! $name) {
 
             return null;
-
         }
 
 
@@ -100,7 +99,6 @@ class HandleInertiaRequests extends Middleware
         if (isset($mapaExacto[$name])) {
 
             return $mapaExacto[$name];
-
         }
 
 
@@ -150,9 +148,7 @@ class HandleInertiaRequests extends Middleware
             'cargarEstilo' => 'Preferencias visuales',
 
             default => \Illuminate\Support\Str::title(str_replace(['-', '_'], ' ', $prefijo)),
-
         };
-
     }
 
 
@@ -220,9 +216,9 @@ class HandleInertiaRequests extends Middleware
 
         $this->agregarGrupo($grupos, 'Compras y Proveedores', 'fas fa-dolly', [
             $this->item($privilegios, 'Proveedor', 'Proveedores', 'proveedores.index', 'far fa-circle'),
-            $this->item($privilegios, 'Compra', 'Solicitudes y compras', 'compras.index', 'far fa-circle'),
+            $this->item($privilegios, 'Compra', 'Compras', 'compras.index', 'far fa-circle'),
             $this->item($privilegios, 'PagoProveedor', 'Pagos a proveedores', 'pagos-proveedor.index', 'far fa-circle'),
-            $this->item($privilegios, 'Solicitud', 'Solicitudes internas', 'solicitudes.index', 'far fa-circle'),
+            $this->item($privilegios, 'Solicitud', 'Solicitudes de compras', 'solicitudes.index', 'far fa-circle'),
         ]);
 
         $this->agregarGrupo($grupos, 'Inventario y Recursos', 'fas fa-boxes', [

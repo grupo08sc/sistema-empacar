@@ -4,8 +4,11 @@ import { useForm } from "@inertiajs/vue3";
 const props = defineProps({
     show: Boolean,
     roles: Array,
+    departamentos: Array,
     usuario: Object,
 });
+
+console.log(props);
 
 const emit = defineEmits(["close"]);
 

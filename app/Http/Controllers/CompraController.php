@@ -22,13 +22,14 @@ class CompraController extends Controller
         $rol = $usuario?->rol?->nombre;
 
         $comprasQuery = Compra::with([
-                'proveedor',
-                'usuario',
-                'solicitante',
-                'aprobador',
-                'detalles.producto',
-                'pagos',
-            ])
+            'proveedor',
+            'usuario',
+            'solicitante',
+            'aprobador',
+            'detalles.producto',
+            'pagos',
+            'solicitud',
+        ])
             ->where('state', 'a')
             ->latest('id');
 
@@ -151,7 +152,7 @@ class CompraController extends Controller
                 ]);
             }
 
-            $compraFinal = $compra->fresh(['proveedor', 'solicitante', 'detalles.producto']);
+            $compraFinal = $compra->fresh(['proveedor', 'solicitante', 'detalles.producto', 'solicitud']);
 
             app(AuditoriaService::class)->registrar(
                 'Compra',
@@ -177,7 +178,7 @@ class CompraController extends Controller
 
     public function show(Request $request, Compra $compra)
     {
-        $compra->load(['proveedor', 'usuario', 'solicitante', 'aprobador', 'detalles.producto', 'pagos.usuario']);
+        $compra->load(['proveedor', 'usuario', 'solicitante', 'aprobador', 'detalles.producto', 'pagos.usuario', 'solicitud']);
 
         if ($request->wantsJson()) {
             return response()->json(['compra' => $compra]);
@@ -264,7 +265,7 @@ class CompraController extends Controller
                 'estado' => $nuevoEstadoPago,
             ]);
 
-            $compraFinal = $compra->fresh(['proveedor', 'solicitante', 'aprobador', 'detalles.producto', 'pagos']);
+            $compraFinal = $compra->fresh(['proveedor', 'solicitante', 'aprobador', 'detalles.producto', 'pagos', 'solicitud']);
 
             app(AuditoriaService::class)->registrar(
                 'Compra',
@@ -401,5 +402,103 @@ class CompraController extends Controller
         }
 
         return to_route('compras.index')->with('success', 'Compra o solicitud anulada correctamente.');
+    }
+
+    public function ejecutar(Request $request, Compra $compra)
+    {
+        $validated = $request->validate([
+            'observacion_aprobacion' => 'nullable|string|max:500',
+        ], [
+            'observacion_aprobacion.max' => 'La observación de aprobación no debe superar 500 caracteres.',
+        ]);
+
+        $compraAprobada = DB::transaction(function () use ($compra, $validated) {
+            $compra = Compra::lockForUpdate()
+                ->with(['detalles.producto', 'proveedor'])
+                ->findOrFail($compra->id);
+
+            if ($compra->estado_aprobacion !== 'aprobada') {
+                throw ValidationException::withMessages([
+                    'compra' => 'Solo se pueden ejecutar solicitudes de compra aprobadas.',
+                ]);
+            }
+
+            $estadoAnterior = $compra->toArray();
+
+            foreach ($compra->detalles as $detalle) {
+                if (! $detalle->producto) {
+                    throw ValidationException::withMessages([
+                        'compra' => 'La solicitud contiene un producto inexistente o inactivo.',
+                    ]);
+                }
+
+                $producto = Producto::lockForUpdate()->findOrFail($detalle->producto->id);
+                $cantidad = (int) $detalle->cantidad;
+                $precio = round((float) $detalle->precio_unitario, 2);
+
+                $producto->increment('stock', $cantidad);
+                $producto->update([
+                    'precio_compra' => $precio,
+                    'fecha_ingreso' => now()->toDateString(),
+                ]);
+
+                Inventario::create([
+                    'id_producto' => $producto->id,
+                    'cantidad' => $cantidad,
+                    'fecha' => $compra->fecha_compra ?? now()->toDateString(),
+                    'tipo' => 'entrada',
+                    'descripcion' => 'Entrada automática por aprobación de solicitud de compra #' . $compra->id,
+                    'state' => 'a',
+                ]);
+            }
+
+            PagoProveedor::create([
+                'id_proveedor' => $compra->id_proveedor,
+                'id_compra' => $compra->id,
+                'id_usuario' => auth()->id(),
+                'monto' => (float) $compra->total,
+                'fecha_pago' => now()->toDateString(),
+                'metodo_pago' => $compra->metodo_pago_propuesto ?: 'efectivo',
+                'referencia' => $compra->referencia_pago_propuesto,
+                'estado' => 'confirmado',
+                'observaciones' => 'Pago inicial aplicado al aprobar la solicitud de compra.',
+                'state' => 'a',
+            ]);
+
+            $nuevoEstadoPago = (float) $compra->saldo <= 0
+                ? 'pagado'
+                : ((float) $compra->monto_pagado > 0 ? 'parcial' : 'pendiente');
+
+            $compra->update([
+                'estado_aprobacion' => 'ejecutada',
+                'aprobado_por' => auth()->id(),
+                'fecha_aprobacion' => now(),
+                'observacion_aprobacion' => $validated['observacion_aprobacion'] ?? null,
+                'stock_aplicado' => true,
+                'estado' => $nuevoEstadoPago,
+            ]);
+
+            $compraFinal = $compra->fresh(['proveedor', 'solicitante', 'aprobador', 'detalles.producto', 'pagos', 'solicitud']);
+
+            app(AuditoriaService::class)->registrar(
+                'Compra',
+                'ejecutar_compra',
+                $compraFinal,
+                'Solicitud de compra ejecutada. Se actualizó stock, inventario y pago inicial si correspondía.',
+                $estadoAnterior,
+                $compraFinal->toArray()
+            );
+
+            return $compraFinal;
+        });
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Solicitud de compra ejecutada correctamente. El stock fue actualizado.',
+                'compra' => $compraAprobada,
+            ]);
+        }
+
+        return to_route('compras.index')->with('success', 'Compra ejecutada correctamente. El stock fue actualizado.');
     }
 }

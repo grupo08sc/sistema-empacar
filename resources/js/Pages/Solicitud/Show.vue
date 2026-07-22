@@ -1,6 +1,9 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import { useDateFormatter } from "../../Composables/useDateFormatter";
+
+const { formatDate, formatDateTime } = useDateFormatter();
 const props = defineProps({ solicitud: Object });
 const money = (v) => `Bs ${Number(v || 0).toFixed(2)}`;
 </script>
@@ -15,7 +18,7 @@ const money = (v) => `Bs ${Number(v || 0).toFixed(2)}`;
       <div class="card-body">
         <div class="row">
           <div class="col-md-4"><p><b>Solicitante:</b> {{ solicitud.usuario?.nombre || solicitud.usuario?.email }}</p><p><b>Departamento:</b> {{ solicitud.departamento?.nombre || '-' }}</p></div>
-          <div class="col-md-4"><p><b>Fecha solicitud:</b> {{ solicitud.fecha_solicitud }}</p><p><b>Fecha requerida:</b> {{ solicitud.fecha_requerida || '-' }}</p></div>
+          <div class="col-md-4"><p><b>Fecha solicitud:</b> {{ formatDate(solicitud.fecha_solicitud) }}</p><p><b>Fecha requerida:</b> {{ formatDate(solicitud.fecha_requerida) || '-' }}</p></div>
           <div class="col-md-4"><p><b>Estado:</b> {{ solicitud.estado }}</p><p><b>Moneda:</b> {{ solicitud.moneda }}</p></div>
         </div>
         <p><b>Descripción:</b> {{ solicitud.descripcion }}</p>

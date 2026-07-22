@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contador;
+use App\Models\Departamento;
 use App\Models\Role;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
@@ -18,8 +19,9 @@ class UsuarioController extends Controller
         $num = $contar->contarModel(11);
 
         $roles = Role::where('state', 'a')->orderBy('nombre')->get();
+        $departamentos = Departamento::where('state', 'a')->orderBy('nombre')->get();
 
-        $usuarios = Usuario::with(['rol'])
+        $usuarios = Usuario::with(['rol', 'departamento'])
             ->where('state', 'a')
             ->orderBy('id', 'asc')
             ->get();
@@ -28,33 +30,40 @@ class UsuarioController extends Controller
             'usuarios' => $usuarios,
             'num' => $num,
             'roles' => $roles,
+            'departamentos' => $departamentos,
         ]);
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'telefono' => 'required|digits_between:6,15',
-            'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8|max:255',
-            'id_rol' => [
-                'required',
-                Rule::exists('roles', 'id')->where(fn ($query) => $query->where('state', 'a')),
-            ],
-        ]);
+        try {
+            $validated = $request->validate([
+                'nombre' => 'required|string|max:255',
+                'telefono' => 'required|digits_between:6,15',
+                'email' => 'required|email|max:255|unique:users,email',
+                'id_departamento' => 'nullable|exists:departamentos,id',
+                'password' => 'required|string|min:8|max:255',
+                'id_rol' => [
+                    'required',
+                    Rule::exists('roles', 'id')->where(fn($query) => $query->where('state', 'a')),
+                ],
+            ]);
 
-        Usuario::create([
-            'nombre' => $validated['nombre'],
-            'telefono' => $validated['telefono'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'id_rol' => $validated['id_rol'],
-            'id_empresa' => 1,
-            'state' => 'a',
-        ]);
+            Usuario::create([
+                'nombre' => $validated['nombre'],
+                'telefono' => $validated['telefono'],
+                'email' => $validated['email'],
+                'id_departamento' => $validated['id_departamento'],
+                'password' => Hash::make($validated['password']),
+                'id_rol' => $validated['id_rol'],
+                'id_empresa' => 1,
+                'state' => 'a',
+            ]);
 
-        return to_route('usuario.index')->with('success', 'Usuario agregado exitosamente.');
+            return to_route('usuario.index')->with('success', 'Usuario agregado exitosamente.');
+        } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+        }
     }
 
     public function update(Request $request, Usuario $usuario)
@@ -65,7 +74,7 @@ class UsuarioController extends Controller
             'email' => 'required|email|max:255|unique:users,email,' . $usuario->id,
             'id_rol' => [
                 'required',
-                Rule::exists('roles', 'id')->where(fn ($query) => $query->where('state', 'a')),
+                Rule::exists('roles', 'id')->where(fn($query) => $query->where('state', 'a')),
             ],
             'password' => 'nullable|string|min:8|max:255',
         ]);

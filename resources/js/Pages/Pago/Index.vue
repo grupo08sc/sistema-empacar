@@ -70,7 +70,7 @@ onUnmounted(() => {
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
                     <h1 class="card-title mb-0">
-                        <i class="fas fa-money-bill-wave mr-2"></i><b>GESTIÓN DE PAGOS</b>
+                        <i class="fas fa-money-bill-wave mr-2"></i><b>Luis: GESTIÓN DE PAGOS</b>
                     </h1>
                     <small class="text-muted">Historial de pagos de clientes y cuotas.</small>
                 </div>

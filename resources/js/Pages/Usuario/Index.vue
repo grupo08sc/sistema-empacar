@@ -9,6 +9,7 @@ import NoPermiso from "@/Components/NoPermiso.vue";
 const props = defineProps({
     usuarios: Array,
     roles: Array,
+    departamentos: Array,
 });
 
 const page = usePage();
@@ -16,7 +17,10 @@ const user = computed(() => page.props.auth.user);
 
 function hasPermission(type) {
     return user.value?.rol?.privilegios?.some(
-        (p) => p.funcionalidad === "Usuario" && p.state === "a" && p[type] === true
+        (p) =>
+            p.funcionalidad === "Usuario" &&
+            p.state === "a" &&
+            p[type] === true,
     );
 }
 
@@ -35,7 +39,7 @@ const userToDelete = ref(null);
 function deleteUsuario() {
     if (!userToDelete.value) return;
     router.delete(route("usuario.destroy", userToDelete.value.id), {
-        onSuccess: () => userToDelete.value = null
+        onSuccess: () => (userToDelete.value = null),
     });
 }
 
@@ -43,8 +47,12 @@ let dataTable = null;
 onMounted(() => {
     if (window.$) {
         dataTable = window.$("#usuarios").DataTable({
-            responsive: true, lengthChange: true, autoWidth: false,
-            language: { url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" }
+            responsive: true,
+            lengthChange: true,
+            autoWidth: false,
+            language: {
+                url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
+            },
         });
     }
 });
@@ -59,10 +67,18 @@ onUnmounted(() => {
 <template>
     <AppLayout title="G. Usuarios">
         <section class="content" v-if="can('Usuario')">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h1 class="card-title mb-0"><i class="fas fa-clock mr-2"></i><b>GESTIONAR USUARIOS</b></h1>
+            <div
+                class="card-header d-flex justify-content-between align-items-center"
+            >
+                <h1 class="card-title mb-0">
+                    <i class="fas fa-clock mr-2"></i><b>GESTIONAR USUARIOS</b>
+                </h1>
                 <div class="d-flex align-items-center ml-auto">
-                    <button v-if="canAdd" class="btn btn-success" @click="showCreate = true">
+                    <button
+                        v-if="canAdd"
+                        class="btn btn-success"
+                        @click="showCreate = true"
+                    >
                         <i class="fa fa-plus"></i>&nbsp; Agregar
                     </button>
                 </div>
@@ -77,6 +93,7 @@ onUnmounted(() => {
                                 <th>NOMBRE</th>
                                 <th>EMAIL</th>
                                 <th>ROL</th>
+                                <th>DEPARTAMENTO</th>
                                 <th>TELEFONO</th>
                                 <th>ACCIONES</th>
                             </tr>
@@ -87,13 +104,28 @@ onUnmounted(() => {
                                 <td>{{ usuario.nombre }}</td>
                                 <td>{{ usuario.email }}</td>
                                 <td>{{ usuario.rol.nombre }}</td>
+                                <td>
+                                    {{
+                                        usuario.departamento
+                                            ? usuario.departamento.nombre
+                                            : "--"
+                                    }}
+                                </td>
                                 <td>{{ usuario.telefono }}</td>
                                 <td>
-                                    <a v-if="canEdit" href="#" @click.prevent="userToEdit = usuario">
+                                    <a
+                                        v-if="canEdit"
+                                        href="#"
+                                        @click.prevent="userToEdit = usuario"
+                                    >
                                         <i class="fa fa-edit"></i>
                                     </a>
                                     &nbsp;
-                                    <a v-if="canDelete" href="#" @click.prevent="userToDelete = usuario">
+                                    <a
+                                        v-if="canDelete"
+                                        href="#"
+                                        @click.prevent="userToDelete = usuario"
+                                    >
                                         <i class="fa fa-trash"></i>
                                     </a>
                                 </td>
@@ -103,24 +135,45 @@ onUnmounted(() => {
                 </div>
             </div>
 
-            <CreateUserModal :show="showCreate" :roles="roles" @close="showCreate = false" />
+            <CreateUserModal
+                :show="showCreate"
+                :departamentos="departamentos"
+                :roles="roles"
+                @close="showCreate = false"
+            />
 
-            <EditUserModal v-if="userToEdit" :show="!!userToEdit" :usuario="userToEdit" :roles="roles"
-                @close="userToEdit = null" />
+            <EditUserModal
+                v-if="userToEdit"
+                :show="!!userToEdit"
+                :usuario="userToEdit"
+                :departamentos="departamentos"
+                :roles="roles"
+                @close="userToEdit = null"
+            />
 
             <div v-if="userToDelete" class="modal-mask">
                 <div class="modal-container text-center">
                     <h5>¿Eliminar Usuario?</h5>
-                    <p>¿Deseas eliminar a <strong>{{ userToDelete.nombre }}</strong>?</p>
+                    <p>
+                        ¿Deseas eliminar a
+                        <strong>{{ userToDelete.nombre }}</strong
+                        >?
+                    </p>
                     <div class="modal-footer text-end">
-                        <button class="btn btn-secondary" @click="userToDelete = null">Cancelar</button>
-                        <button class="btn btn-danger" @click="deleteUsuario">Eliminar</button>
+                        <button
+                            class="btn btn-secondary"
+                            @click="userToDelete = null"
+                        >
+                            Cancelar
+                        </button>
+                        <button class="btn btn-danger" @click="deleteUsuario">
+                            Eliminar
+                        </button>
                     </div>
                 </div>
             </div>
         </section>
         <NoPermiso v-else mensaje="No tienes permisos para ver los usuarios." />
-
     </AppLayout>
 </template>
 

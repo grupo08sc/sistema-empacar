@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { Head, useForm } from '@inertiajs/vue3';
+import { computed, ref } from "vue";
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 import AuthLayout from "../../Layouts/AuthLayout.vue";
 
+const page = usePage();
 const isLoading = ref(false);
 
 const loginForm = useForm({
@@ -24,7 +25,11 @@ const handleLogin = () => {
         });
     }, 500);
 };
-const empacarLogo = '/img/empacar-brand.svg';
+const assetBaseUrl = computed(() => {
+    const base = typeof page.props.assetUrl === 'string' ? page.props.assetUrl : '/';
+    return base.replace(/\/?$/, '/');
+});
+const empacarLogo = computed(() => `${assetBaseUrl.value}img/empacar-brand.svg`);
 </script>
 
 <template>

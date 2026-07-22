@@ -1,6 +1,10 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
-const empacarLogo = '/img/empacar-brand.svg';
+import { computed } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
+
+const page = usePage();
+const assetBaseUrl = computed(() => (page.props.assetUrl || '/').replace(/\/?$/, '/'));
+const empacarLogo = computed(() => `${assetBaseUrl.value}img/empacar-brand.svg`);
 </script>
 
 <template>

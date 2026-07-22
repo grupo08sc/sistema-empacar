@@ -300,6 +300,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/compras/{compra}', [CompraController::class, 'destroy'])
         ->middleware('privilegio:Compra,borrar')
         ->name('compras.destroy');
+            Route::put('/compras/{compra}/ejecutar', [CompraController::class, 'ejecutar'])
+        ->middleware('privilegio:Compra,modificar')
+        ->name('compras.ejecutar');
 
     Route::get('/solicitudes', [SolicitudController::class, 'index'])
         ->middleware('privilegio:Solicitud,leer')
@@ -316,6 +319,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/solicitudes/{solicitud}', [SolicitudController::class, 'destroy'])
         ->middleware('privilegio:Solicitud,borrar')
         ->name('solicitudes.destroy');
+    Route::put('/solicitudes/{solicitud}/aprobar', [SolicitudController::class, 'aprobar'])
+        ->middleware('privilegio:Solicitud,modificar')
+        ->name('solicitudes.aprobar');
 
     Route::get('/pagos-proveedor', [PagoProveedorController::class, 'index'])
         ->middleware('privilegio:PagoProveedor,leer')

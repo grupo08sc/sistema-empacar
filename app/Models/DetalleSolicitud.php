@@ -9,13 +9,13 @@ class DetalleSolicitud extends Model
     protected $table = 'detalle_solicitud';
 
     protected $fillable = [
-        'id_solicitud',
-        'id_producto',
-        'id_articulo',
-        'nombre_articulo',
         'cantidad',
-        'precio_estimado',
+        'id_articulo',
+        'id_producto',
+        'id_solicitud',
         'importe',
+        'nombre_articulo',
+        'precio_estimado',
         'state',
     ];
 
