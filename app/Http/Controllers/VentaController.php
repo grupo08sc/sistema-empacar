@@ -62,7 +62,7 @@ class VentaController extends Controller
             'descuento' => 'nullable|numeric|min:0',
             'tipo_pago' => 'nullable|in:contado,credito,mixto',
             'monto_inicial' => 'nullable|numeric|min:0',
-            'cantidad_cuotas' => 'nullable|integer|min:1',
+            'cantidad_cuotas' => 'nullable|integer',
             'fecha_inicio' => 'nullable|date',
             'frecuencia' => 'nullable|in:semanal,quincenal,mensual',
             'metodo_pago_inicial' => 'nullable|string|max:50',
@@ -93,10 +93,9 @@ class VentaController extends Controller
                 null,
                 $venta->toArray()
             );
-        } catch (ValidationException $e) {
-            throw $e;
         } catch (\Throwable $e) {
-            return back()->withErrors(['venta' => 'No se pudo registrar la venta: ' . $e->getMessage()]);
+            // return back()->withErrors(['venta' => 'No se pudo registrar la venta: ' . $e->getMessage()]);
+            return response()->json(['error' => 'No se pudo registrar la venta: ' . $e->getMessage()], 500);
         }
 
         return to_route('venta.index')->with('success', 'Venta creada correctamente.');

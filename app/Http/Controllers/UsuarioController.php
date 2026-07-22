@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cliente;
 use App\Models\Contador;
 use App\Models\Departamento;
 use App\Models\Role;
@@ -49,7 +50,7 @@ class UsuarioController extends Controller
                 ],
             ]);
 
-            Usuario::create([
+            $usuario = Usuario::create([
                 'nombre' => $validated['nombre'],
                 'telefono' => $validated['telefono'],
                 'email' => $validated['email'],
@@ -59,6 +60,24 @@ class UsuarioController extends Controller
                 'id_empresa' => 1,
                 'state' => 'a',
             ]);
+            $usuario->fresh(['rol', 'departamento']);
+            if ($usuario && $usuario->rol) {
+                $rol = $usuario->rol;
+                if ($rol->nombre === 'Cliente') {
+                    $cliente = Cliente::create($validated + [
+                        'id_user' => $usuario->id,
+                        'state' => 'a',
+                        'nombre' => $usuario->nombre,
+                        'telefono' => $usuario->telefono,
+                        'email' => $usuario->email,
+                        'direccion' =>  "",
+                        'documento' => null,
+                        'ciudad' => null,
+                    ]);
+                }
+            } else {
+                return response()->json(['error' => 'Error al crear el usuario.'], 500);
+            }
 
             return to_route('usuario.index')->with('success', 'Usuario agregado exitosamente.');
         } catch (\Throwable $th) {
