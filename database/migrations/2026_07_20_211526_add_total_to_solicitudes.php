@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('solicitudes', function (Blueprint $table) {
-            if (! Schema::hasColumn('compras', 'total')) {
+            if (! Schema::hasColumn('solicitudes', 'total')) {
                 $table->decimal('total', 12, 2)->default(0);
             }
             $table->foreignId('id_proveedor')->nullable()
