@@ -15,8 +15,16 @@ return new class extends Migration
             if (! Schema::hasColumn('solicitudes', 'total')) {
                 $table->decimal('total', 12, 2)->default(0);
             }
-            $table->foreignId('id_proveedor')->nullable()
-                ->default(null)->constrained('proveedores');
+            if (Schema::hasColumn('solicitudes', 'id_departamento')) {
+                $table->dropColumn('id_departamento');
+                $table->foreignId('id_departamento')->nullable()
+                    ->default(null)->constrained('departamentos');
+            }
+            if (Schema::hasColumn('solicitudes', 'id_proveedor')) {
+                $table->dropColumn('id_proveedor');
+                $table->foreignId('id_proveedor')->nullable()
+                    ->default(null)->constrained('proveedores');
+            }
             $table->enum('metodo_pago_propuesto', [
                 'cheque',
                 'efectivo',
@@ -35,8 +43,10 @@ return new class extends Migration
     {
         Schema::table('solicitudes', function (Blueprint $table) {
             $table->dropColumn('total');
-            $table->dropForeign('solicitudes_id_proveedor_foreign');
+            $table->dropForeign('id_proveedor');
             $table->dropColumn('id_proveedor');
+            $table->dropForeign('id_departamento');
+            $table->dropColumn('id_departamento');
             $table->dropColumn('metodo_pago_propuesto');
         });
     }
